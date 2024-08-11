@@ -1,42 +1,29 @@
-import { validationResult } from "express-validator"
 import { prisma } from "../config/db.js";
 import bcrypt from 'bcrypt';
-import { CustomError } from "../utils/errors/customError.js";
-import jwt from "jsonwebtoken";
 
-const register = async (req) => {
-    const errors = validationResult(req);
-    
-    if (!errors.isEmpty()){
-        throw new CustomError('Validation Error', 400, errors.array())
-    }
 
-    const hashedPassword = await bcrypt.hash(req.body.password, 10);
+const register = async (nim, email, password, refreshToken) => {
+    const hashedPassword = await bcrypt.hash(password, 10);
     return await prisma.user.create({
         data: {
-            nim: req.body.nim,
-            email: req.body.email,
+            nim,
+            email,
             password: hashedPassword
         },
         select: {
             nim: true,
             email: true,
-            createAt: true
+            createdAt: true
         }
     })
 }
 
-const login = async (req) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()){
-        throw new CustomError('Validation Error', 401, errors.array());
-    }
-
-    const user = await prisma.user.findFirst({
+const findIndetifier = async (identifier) => {
+    return await prisma.user.findFirst({
         where: {
             OR: [
-                {nim: req.body.identifier},
-                {email: req.body.identifier}
+                {nim: identifier},
+                {email: identifier}
             ]
         },
         select: {
@@ -45,16 +32,41 @@ const login = async (req) => {
             password: true,
         }
     });
+}
 
-    if (!user || !(await bcrypt.compare(req.body.password, user.password))){
-        throw new CustomError('User or password invalid', 401)
-    }
+const saveRefreshToken = async (nim, refreshToken, expiredAt) => {
+    await prisma.refreshToken.create({
+        data: {
+            token: refreshToken,
+            nim,
+            expiredAt
+        }
+    })
+}
 
-    const token = jwt.sign({nim: user.nim}, process.env.JWT_SECRET, {expiresIn: '1h'});
-    return {user, token}
+const deleteRefreshToken = async (token) => {
+    await prisma.refreshToken.delete({
+        where: {
+            token
+        }
+    })
+}
+
+const findRefreshToken = async(token) => {
+    return await prisma.refreshToken.findUnique({
+        where: {
+            nim
+        },
+        include: {
+            user: true
+        }
+    })
 }
 
 export default {
     register,
-    login
+    findIndetifier,
+    saveRefreshToken,
+    deleteRefreshToken,
+    findRefreshToken
 }

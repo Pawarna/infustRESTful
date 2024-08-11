@@ -14,14 +14,25 @@ datasource db {
 }
 
 model User {
-  nim      String?  @unique @db.VarChar(11)
-  email    String   @id @unique(map: "email") @db.VarChar(50)
-  password String   @db.VarChar(255)
-  createAt DateTime @default(now())
-  updateAt DateTime @updatedAt
-  student  Student?
+  nim          String?        @unique @db.VarChar(11)
+  email        String         @id @unique(map: "email") @db.VarChar(50)
+  password     String         @db.VarChar(255)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  refreshTokens RefreshToken[]
+  student      Student?
 
   @@map("users")
+}
+
+model RefreshToken {
+  token     String   @id @unique
+  nim       String
+  user      User     @relation(fields: [nim], references: [nim])
+  createdAt DateTime @default(now())
+  expiredAt DateTime
+
+  @@map("refreshTokens")
 }
 
 enum Gender {
@@ -50,7 +61,7 @@ model Student {
   name          String    @db.VarChar(50)
   birthdayPlace String?   @db.VarChar(100)
   birthday      DateTime? @db.Date
-  religion      Religion? 
+  religion      Religion?
   gender        Gender?
   studyProgram  String    @default("Informatika")
   class         String?   @db.VarChar(1)

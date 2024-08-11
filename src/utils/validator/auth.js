@@ -29,11 +29,27 @@ const validateRegister = [
         }),
     body('password')
         .isLength({min:8}).withMessage('Password must be at least 8 characters long'),
+    (req, res, next) => {
+        const errors = validationResult(req);
+    
+        if (!errors.isEmpty()){
+            return next(new CustomError('Validation Error', 401, errors.array()))
+        }
+        next()
+    }
 ];
 
 const validateLogin = [
     body('identifier').notEmpty().withMessage('NIM or Email required'),
     body('password').notEmpty().withMessage('Password required'),
+    (req, res, next) => {
+        const errors = validationResult(req);
+    
+        if (!errors.isEmpty()){
+            return next(new CustomError('Validation Error', 401, errors.array()))
+        }
+        next()
+    }
 ];
 
 export {
