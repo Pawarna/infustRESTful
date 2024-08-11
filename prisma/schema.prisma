@@ -1,0 +1,63 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  nim      String?  @unique @db.VarChar(11)
+  email    String   @id @unique(map: "email") @db.VarChar(50)
+  password String   @db.VarChar(255)
+  createAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+  student  Student?
+
+  @@map("users")
+}
+
+enum Gender {
+  male
+  female
+}
+
+enum Religion {
+  islam
+  kristen
+  katholik
+  hindu
+  budha
+  konghuchu
+}
+
+enum Badge {
+  princeOfInformatics
+  princessOfInformatics
+  student
+  admin
+}
+
+model Student {
+  nim           String    @id @unique @db.VarChar(11)
+  name          String    @db.VarChar(50)
+  birthdayPlace String?   @db.VarChar(100)
+  birthday      DateTime? @db.Date
+  religion      Religion? 
+  gender        Gender?
+  studyProgram  String    @default("Informatika")
+  class         String?   @db.VarChar(1)
+  classOf       Int?
+  motto         String?   @db.VarChar(255)
+  badges        Badge?    @default(student)
+  user          User      @relation(fields: [nim], references: [nim], onDelete: Cascade, onUpdate: Cascade)
+
+  @@map("students")
+}
