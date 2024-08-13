@@ -34,18 +34,28 @@ const findIndetifier = async (identifier) => {
     });
 }
 
-const saveRefreshToken = async (nim, refreshToken, expiredAt) => {
+const saveRefreshToken = async (nim, refreshToken, deviceInfo, expiredAt) => {
+    await prisma.refreshToken.deleteMany({
+        where: {
+            nim,
+            ipAddress: deviceInfo.ipAddress,
+            userAgent: deviceInfo.userAgent
+        }
+    });
+
+    // Simpan token refresh yang baru
     await prisma.refreshToken.create({
         data: {
             token: refreshToken,
             nim,
-            expiredAt
+            expiredAt,
+            ...deviceInfo
         }
-    })
+    });
 }
 
 const deleteRefreshToken = async (token) => {
-    await prisma.refreshToken.delete({
+    await prisma.refreshToken.deleteMany({
         where: {
             token
         }

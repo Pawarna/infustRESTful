@@ -14,23 +14,27 @@ datasource db {
 }
 
 model User {
-  nim          String?        @unique @db.VarChar(11)
-  email        String         @id @unique(map: "email") @db.VarChar(50)
-  password     String         @db.VarChar(255)
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
+  nim           String?        @unique @db.VarChar(11)
+  email         String         @id @unique(map: "email") @db.VarChar(50)
+  password      String         @db.VarChar(255)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
   refreshTokens RefreshToken[]
-  student      Student?
+  student       Student?
 
   @@map("users")
 }
 
 model RefreshToken {
-  token     String   @id @unique
-  nim       String
-  user      User     @relation(fields: [nim], references: [nim])
-  createdAt DateTime @default(now())
-  expiredAt DateTime
+  token      String   @id @unique
+  nim        String
+  user       User     @relation(fields: [nim], references: [nim])
+  deviceName String   @db.VarChar(30)
+  deviceType String   @db.VarChar(30)
+  ipAddress  String   @db.VarChar(10)
+  userAgent  String
+  createdAt  DateTime @default(now())
+  expiredAt  DateTime
 
   @@map("refreshTokens")
 }

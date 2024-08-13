@@ -10,6 +10,12 @@ const getUsers = async(req) => {
     const users = await prisma.user.findMany({
         skip,
         take: limit,
+        select: {
+            nim: true,
+            email: true,
+            createdAt: true,
+            updatedAt: true
+        },
         orderBy: {
             nim: 'asc'
         }

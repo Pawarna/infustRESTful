@@ -4,6 +4,8 @@ import { sendSuccessResponse } from '../utils/responses/response.js';
 import jwt from '../utils/token/jwt.js';
 import bcrypt from 'bcrypt';
 import {CustomError} from '../utils/errors/customError.js';
+import {getDeviceInfo} from '../utils/device/info.js'
+
 
 const register = async (req, res, next) => {
     const {nim, email, password} = req.body
@@ -13,8 +15,9 @@ const register = async (req, res, next) => {
         const user = await authService.register(nim, email, password)
         const accessToken = jwt.generateAccessToken(user);
         const refreshToken = jwt.generateRefreshToken(user);
-    
-        await authService.saveRefreshToken(nim, refreshToken, new Date(Date.now() + 7 * 24 * 60 * 60 * 1000))
+        const deviceInfo = getDeviceInfo(req);
+
+        await authService.saveRefreshToken(nim, refreshToken, deviceInfo, new Date(Date.now() + 7 * 24 * 60 * 60 * 1000))
 
         logger.info(`User registered with NIM: ${user.nim}`)
         sendSuccessResponse(res, 'Register successfully', {user, accessToken, refreshToken}, 201)
@@ -33,9 +36,12 @@ const login = async (req, res, next) => {
         if (!user || !(await bcrypt.compare(password, user.password))){
             throw new CustomError('Invalid user or password', 401)
         }
+
+        const deviceInfo = getDeviceInfo(req);
+
         const accessToken = jwt.generateAccessToken(user);
         const refreshToken = jwt.generateRefreshToken(user);
-        await authService.saveRefreshToken(user.nim, refreshToken, new Date(Date.now() + 7 * 24 * 60 * 60 * 1000))
+        await authService.saveRefreshToken(user.nim, refreshToken, deviceInfo, new Date(Date.now() + 7 * 24 * 60 * 60 * 1000))
         
         delete user.password
 
@@ -61,7 +67,7 @@ const refreshToken = async (req, res, next) => {
         sendSuccessResponse(res, 'Token refreshed successfully', {accessToken: newAccessToken}, 200);
     } catch (error) {
         await authService.deleteRefreshToken(token)
-        next(CustomError('Invalid or expired refresh token', 403));
+        next(new CustomError('Invalid or expired refresh token', 403));
     }
 }
 

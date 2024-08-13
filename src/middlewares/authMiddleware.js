@@ -8,8 +8,11 @@ const authVerify = async (req, res, next) => {
         const token = req.headers['authorization']
         if (!token) throw new CustomError('Access denied. No token provided', 401);
         const user = jwt.verifyAccessToken(token);
-        if (!user) throw new CustomError('User not found', 401);
-        req.user = user;
+        if (!user) throw new CustomError('Invalid or expired token', 401);
+        const existingUser = await prisma.user.findUnique({ where: { nim: user.nim } });
+        if (!existingUser) throw new CustomError('User not found', 404);
+        
+        req.user = existingUser;
         next();
     } catch (error) {
         logger.error(error);

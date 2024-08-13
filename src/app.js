@@ -1,5 +1,5 @@
 import express from 'express';
-import cors from 'cors';
+import cors from 'cors';        
 import { errorMiddleware } from './middlewares/errorMiddleware.js';
 import { requestLogger } from './middlewares/loggerMiddleware.js';
 import {router} from './routes/index.js';

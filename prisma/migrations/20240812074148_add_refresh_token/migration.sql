@@ -16,6 +16,10 @@ ALTER TABLE `users` DROP COLUMN `createAt`,
 CREATE TABLE `refreshTokens` (
     `token` VARCHAR(191) NOT NULL,
     `nim` VARCHAR(191) NOT NULL,
+    `deviceName` VARCHAR(30) NOT NULL,
+    `deviceType` VARCHAR(30) NOT NULL,
+    `ipAddress` VARCHAR(10) NOT NULL,
+    `userAgent` VARCHAR(191) NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `expiredAt` DATETIME(3) NOT NULL,
 
