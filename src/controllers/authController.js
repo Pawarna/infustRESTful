@@ -55,15 +55,15 @@ const login = async (req, res, next) => {
 const refreshToken = async (req, res, next) => {
     const {token} = req.body
     if (!token) {
-        return next(CustomError('Refresh token is required', 403))
+        return next(new CustomError('Refresh token is required', 403))
     }
     try {
+        const verify = jwt.verifyRefreshToken(token);
         const storedToken = await authService.findRefreshToken(token);
-        if (!storedToken) throw new CustomError('Invalid refresh token', 403);
-        
-        const user = jwt.verifyRefreshToken(token);
-        const newAccessToken = jwt.generateAccessToken(user);
+        if (!storedToken || !verify) throw new CustomError('Invalid refresh token or expired refresh token', 403);
 
+        const user = storedToken.user
+        const newAccessToken = jwt.generateAccessToken(user);
         sendSuccessResponse(res, 'Token refreshed successfully', {accessToken: newAccessToken}, 200);
     } catch (error) {
         await authService.deleteRefreshToken(token)
@@ -75,7 +75,7 @@ const logout = async (req, res, next) => {
     const {token} = req.body
     try {
         await authService.deleteRefreshToken(token);
-        sendSuccessResponse(res, 'Logout successfully', {statusCode: 200});
+        sendSuccessResponse(res, 'Logout successfully');
     } catch (error) {
         next(error);
     }

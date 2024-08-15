@@ -1,8 +1,8 @@
-const sendSuccessResponse = (res, message, data, statusCode = 200) => {
+const sendSuccessResponse = (res, message, result, statusCode = 200) => {
     res.status(statusCode).json({
         status: 'success',
         message,
-        data
+        result
     })
 }
 

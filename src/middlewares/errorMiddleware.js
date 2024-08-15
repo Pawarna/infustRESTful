@@ -1,3 +1,4 @@
+import jwt from "jsonwebtoken";
 import { logger } from "../utils/logging/logger.js";
 
 export const errorMiddleware = (err, req, res, next) => {
@@ -8,7 +9,10 @@ export const errorMiddleware = (err, req, res, next) => {
     if (err.name === 'Validation Error'){
         statusCode = 400;
         message = 'Validation Error'
-    } 
+    } else if (err instanceof jwt.JsonWebTokenError){
+        statusCode = 401;
+    }
+    
 
     res.status(statusCode).json({
         status: 'error',

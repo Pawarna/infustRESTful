@@ -28,7 +28,7 @@ model User {
 model RefreshToken {
   token      String   @id @unique
   nim        String
-  user       User     @relation(fields: [nim], references: [nim])
+  user       User     @relation(fields: [nim], references: [nim], onDelete: Cascade, onUpdate: Restrict)
   deviceName String   @db.VarChar(30)
   deviceType String   @db.VarChar(30)
   ipAddress  String   @db.VarChar(10)

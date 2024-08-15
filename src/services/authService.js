@@ -65,7 +65,7 @@ const deleteRefreshToken = async (token) => {
 const findRefreshToken = async(token) => {
     return await prisma.refreshToken.findUnique({
         where: {
-            nim
+            token
         },
         include: {
             user: true
