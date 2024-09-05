@@ -2,6 +2,7 @@ import userService from "../services/userService.js";
 import { CustomError } from "../utils/errors/customError.js";
 import { logger } from "../utils/logging/logger.js";
 import {sendSuccessResponse} from '../utils/responses/response.js';
+import bcrypt from 'bcrypt';
 
 const getUsers = async (req, res, next) => {
     const page = parseInt(req.query.page) || 1;
@@ -18,16 +19,16 @@ const getUsers = async (req, res, next) => {
 }
 
 const getUserBy = async (req, res, next) => {
-    const value = req.params.value;
+    const {value} = req.params;
     let by = 'nim';
     if (!/^\d+$/.test(value)){
         by = 'email';
     }
     try {
-        logger.info(`Fething user ${value} by : ${req.user.value}`);
-        const user = await userService.getUser({by}, value);
+        logger.info(`Fething user ${req.params.value} by : ${req.user.nim}`);
+        const user = await userService.getUser(by, value);
         if (!user) throw new CustomError('User not found.', 404)
-        sendSuccessResponse(res, `Get user ${value} successful`, user, 200);
+        sendSuccessResponse(res, `Get user ${user.nim} successful`, user, 200);
     } catch (error) {
         next(error);
     }
@@ -36,16 +37,19 @@ const getUserBy = async (req, res, next) => {
 const updateUser = async (req, res, next) => {
     const {nim} = req.params
     try {
-        const existUser = userService.getUser({by:'nim'}, nim)
+        const existUser = await userService.getUser({by:'nim'}, nim)
         if (!existUser) throw new CustomError('User not found', 404);
 
         const update = {}
 
-        if (req.body.nim) update.nim = req.body.nim;
-        if (req.body.email) update.email = req.body.email;
-        if (req.body.password) update.password = req.body.password;
+        if (req.body.email) {
+            update.email = req.body.email;
+        }
+        if (req.body.password) {
+            update.password = await bcrypt.hash(req.body.password, 10);
+        }
 
-        const user = await userService.updateUser(nim, update);
+        const user = await userService.updateUser(existUser.nim, update);
         sendSuccessResponse(res, `Update user ${nim} successfully`, user)
     } catch (error) {
         next(error);

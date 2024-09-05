@@ -45,6 +45,12 @@ const getUser = async({by = 'nim'} = {}, value) => {
     const user = await prisma.user.findFirst({
         where: {
             [by]: value,
+        },
+        select: {
+            nim: true,
+            email: true,
+            createdAt: true,
+            updatedAt: true
         }
     });
 
@@ -54,7 +60,7 @@ const getUser = async({by = 'nim'} = {}, value) => {
 const updateUser = async (nim, data) => {
     const user = await prisma.user.update({
         where: {
-            nim
+            nim: nim
         },
         data: data,
         select: {

@@ -14,8 +14,8 @@ datasource db {
 }
 
 model User {
-  nim           String?        @unique @db.VarChar(11)
-  email         String         @id @unique(map: "email") @db.VarChar(50)
+  nim           String        @id @unique @db.VarChar(11)
+  email         String         @unique(map: "email") @db.VarChar(50)
   password      String         @db.VarChar(255)
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
@@ -28,7 +28,7 @@ model User {
 model RefreshToken {
   token      String   @id @unique
   nim        String
-  user       User     @relation(fields: [nim], references: [nim], onDelete: Cascade, onUpdate: Restrict)
+  user       User     @relation(fields: [nim], references: [nim], onDelete: Cascade, onUpdate: Cascade)
   deviceName String   @db.VarChar(30)
   deviceType String   @db.VarChar(30)
   ipAddress  String   @db.VarChar(10)
@@ -61,7 +61,8 @@ enum Badge {
 }
 
 model Student {
-  nim           String    @id @unique @db.VarChar(11)
+  id            Int       @id @default(autoincrement())
+  nim           String    @unique @db.VarChar(11)
   name          String    @db.VarChar(50)
   birthdayPlace String?   @db.VarChar(100)
   birthday      DateTime? @db.Date
