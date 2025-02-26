@@ -57,7 +57,7 @@ const updateUser = async (req, res, next) => {
 }
 
 const deleteUser = async (req, res, next) => {
-    const {nim} = req.params;
+    const {nim} = req.user;
     try {
         await userService.deleteUser(nim);
         sendSuccessResponse(res, `Delete user ${nim} success`);

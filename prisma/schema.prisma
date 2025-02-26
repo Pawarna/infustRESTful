@@ -14,7 +14,7 @@ datasource db {
 }
 
 model User {
-  nim           String        @id @unique @db.VarChar(11)
+  nim           String         @id @unique @db.VarChar(11)
   email         String         @unique(map: "email") @db.VarChar(50)
   password      String         @db.VarChar(255)
   createdAt     DateTime       @default(now())
@@ -61,19 +61,44 @@ enum Badge {
 }
 
 model Student {
-  id            Int       @id @default(autoincrement())
-  nim           String    @unique @db.VarChar(11)
-  name          String    @db.VarChar(50)
-  birthdayPlace String?   @db.VarChar(100)
-  birthday      DateTime? @db.Date
+  id            Int           @id @default(autoincrement())
+  nim           String        @unique @db.VarChar(11)
+  name          String        @db.VarChar(50)
+  birthdayPlace String?       @db.VarChar(100)
+  birthday      DateTime?     @db.Date
   religion      Religion?
   gender        Gender?
-  studyProgram  String    @default("Informatika")
-  class         String?   @db.VarChar(1)
+  studyProgram  String        @default("Informatika")
+  class         String?       @db.VarChar(1)
   classOf       Int?
-  motto         String?   @db.VarChar(255)
-  badges        Badge?    @default(student)
-  user          User      @relation(fields: [nim], references: [nim], onDelete: Cascade, onUpdate: Cascade)
+  motto         String?       @db.VarChar(255)
+  badges        Badge?        @default(student)
+  user          User          @relation(fields: [nim], references: [nim], onDelete: Cascade, onUpdate: Cascade)
+  task          StudentTask[]
 
   @@map("students")
+}
+
+model Task {
+  id            Int           @id @default(autoincrement())
+  title         String        @db.VarChar(50)
+  description   String?       @db.Text
+  course        String
+  dueDate       DateTime
+  classOf       Int
+  submittedTo   String?
+  linkSubmition String?
+  students       StudentTask[]
+
+  @@map("tasks")
+}
+
+model StudentTask {
+  id         Int       @id @default(autoincrement())
+  nim        String    @db.VarChar(11)
+  student    Student   @relation(fields: [nim], references: [nim])
+  task       Task      @relation(fields: [taskId], references: [id])
+  taskId     Int
+  completed  Boolean   @default(false)
+  assignedAt DateTime?
 }

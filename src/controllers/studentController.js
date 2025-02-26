@@ -1,3 +1,4 @@
+import { prisma } from "../config/db.js";
 import studentService from "../services/studentService.js";
 import { CustomError } from "../utils/errors/customError.js";
 import {sendSuccessResponse} from '../utils/responses/response.js';
@@ -21,7 +22,6 @@ const createStudent = async (req, res, next) => {
         }
         if (req.body.birthday){
             data.birthday = new Date(req.body.birthday);
-            data.birthday.setHours(0, 0, 0, 0);
         }
         if (req.body.religion){
             data.religion = req.body.religion
@@ -39,6 +39,19 @@ const createStudent = async (req, res, next) => {
             data.badges = req.body.badges
         }
         const student = await studentService.createStudent(data);
+        const tasks = await prisma.task.findMany({
+            where: {
+                classOf: student.classOf
+            }
+        })
+        const studentTask = await prisma.studentTask.createMany({
+            data: 
+                tasks.map(task => ({
+                    nim: student.nim,
+                    taskId: task.id
+                }))
+            
+        })
         sendSuccessResponse(res, 'Create Student Success', student, 201);
     } catch (error) {
         next(error);

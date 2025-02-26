@@ -5,7 +5,7 @@ import jwt from '../utils/token/jwt.js';
 
 const authVerify = async (req, res, next) => {
     try {
-        const token = req.headers['authorization']
+        const token = req.headers['authorization'].split('')[1]
         if (!token) throw new CustomError('Access denied. No token provided', 401);
         const user = jwt.verifyAccessToken(token);
         if (!user) throw new CustomError('Invalid or expired token', 401);
